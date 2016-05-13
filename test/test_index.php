@@ -6,7 +6,7 @@
  * Time: 19:54
  */
 
-require('./_util/DbUtil.php');
+require('../_util/DbUtil.php');
 
 
 $dbUtil = new DbUtil();

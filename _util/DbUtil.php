@@ -107,4 +107,34 @@ class DbUtil
         }
         return $data;
     }
+
+    /**
+     * スレッドを削除するメソッド
+     * @param $threadId
+     * @param $deleteKey
+     */
+    public function deleteByThreadId($threadId, $deleteKey) {
+        $threadRecord = $this->selectByThreadId($threadId);
+        // もらったthreadIdでDBにデータが無かった場合
+        if (empty($threadRecord)) {
+            return false;
+        }
+
+        $execDeleteKey = $threadRecord['delete_key'];
+        if ($deleteKey === $execDeleteKey) {
+            // delete keyがマッチすれば削除
+            try {
+                $stmt = $this->pdo->prepare('DELETE FROM threads WHERE id = :threadId');
+                $stmt->bindValue(':threadId', $threadId, PDO::PARAM_INT);
+                $stmt->execute();
+            } catch (Exception $e) {
+                echo $e->getMessage();
+                return false;
+            }
+            return true;
+        } else {
+            // マッチしない場合
+            return false;
+        }
+    }
 }
