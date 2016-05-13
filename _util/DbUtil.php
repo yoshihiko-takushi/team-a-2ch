@@ -46,6 +46,23 @@ class DbUtil
     }
 
     /**
+     * table名を受け取り、そのデータすべて取得
+     * @param $tableName
+     * @return array|bool
+     */
+    public function selectAll($tableName)
+    {
+        try {
+            $query = $this->pdo->query("SELECT * FROM $tableName");
+            $data = $query->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            echo $e->getMessage();
+            return false;
+        }
+        return $data;
+    }
+
+    /**
      * スレッドテーブルを検索する
      * @param $threadId
      * @return array
@@ -113,7 +130,8 @@ class DbUtil
      * @param $threadId
      * @param $deleteKey
      */
-    public function deleteByThreadId($threadId, $deleteKey) {
+    public function deleteByThreadId($threadId, $deleteKey)
+    {
         $threadRecord = $this->selectByThreadId($threadId);
         // もらったthreadIdでDBにデータが無かった場合
         if (empty($threadRecord)) {
