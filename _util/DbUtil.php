@@ -11,7 +11,7 @@ class DbUtil
     private $dbHost = '127.0.0.1';
     private $dbName = 'a-team-2ch';
     private $user = 'root';
-    private $password = 'testTamashiro2015';
+    private $password = 'root';
     private $charset = 'utf8';
     private $dbh;
     private $pdo;
