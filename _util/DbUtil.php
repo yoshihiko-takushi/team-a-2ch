@@ -47,14 +47,75 @@ class DbUtil
 
     /**
      * table名を受け取り、そのデータすべて取得
+     *
      * @param $tableName
      * @return array|bool
      */
     public function selectAll($tableName)
     {
+        $sql = "SELECT * FROM $tableName";
+        return $this->executeQuery($sql);
+    }
+
+    /**
+     * ページネーションを実行する
+     * @param $tableName
+     * @param int $limit
+     * @param int $offset
+     * @return bool
+     */
+    public function paginate($tableName, $limit = 0, $offset = 20) {
+        $stmt = $this->pdo->prepare("SELECT * FROM $tableName");
+        $stmt->bindValue(":limit", $limit, PDO::PARAM_INT);
+        $stmt->bindValue(":offset", $offset, PDO::PARAM_INT);
+        return $this->executeStatement($stmt);
+    }
+
+    public function selectAllCount($tableName) {
+        $sql = "SELECT COUNT(*) as count FROM $tableName";
+        return $this->executeFirst($sql);
+    }
+
+    /**
+     * sqlを実行するメソッド
+     * @param $sql
+     * @return bool
+     */
+    public function executeFirst($sql) {
         try {
-            $query = $this->pdo->query("SELECT * FROM $tableName");
+            $query = $this->pdo->query($sql);
+            $data = $query->fetch(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            echo $e->getMessage();
+            return false;
+        }
+        return $data;
+    }
+
+    /**
+     * sqlを実行するメソッド
+     * @param $sql
+     * @return bool
+     */
+    public function executeQuery($sql) {
+        try {
+            $query = $this->pdo->query($sql);
             $data = $query->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            echo $e->getMessage();
+            return false;
+        }
+        return $data;
+    }
+
+    /**
+     * @param $stmt
+     * @return bool
+     */
+    public function executeStatement($stmt) {
+        try {
+            $stmt->execute();
+            $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (Exception $e) {
             echo $e->getMessage();
             return false;

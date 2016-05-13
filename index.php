@@ -9,15 +9,16 @@ require('./_util/DbUtil.php');
 require('./_util/ViewUtil.php');
 
 $dbUtil = new DbUtil();
-$threads = $dbUtil->selectAll('threads');
+$threads = $dbUtil->paginate('threads');
+$threadsAllCount = $dbUtil->selectAllCount('threads');
 ?>
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Team A ２ｃｈ</title>
+    <title>Team A 2ch</title>
 </head>
 <body>
-<h1>スレッド一覧</h1>
+<h1>スレッド一覧 <span>全<?= ViewUtil::h($threadsAllCount['count']) ?>件</span></h1>
 <ul id="thread-list">
     <?php foreach ($threads as $thread): ?>
         <li>
