@@ -11,7 +11,7 @@ class DbUtil
     private $dbHost = '127.0.0.1';
     private $dbName = 'a-team-2ch';
     private $user = 'root';
-    private $password = 'testTamashiro2015';
+    private $password = 'root';
     private $charset = 'utf8';
     private $dbh;
     private $pdo;
@@ -111,12 +111,12 @@ class DbUtil
     {
         $data = [];
         if ($commentId === '') {
-            echo 'threadIDを渡してください';
+            echo 'commentIDを渡してください'; // fix me
             return $data;
         }
         try {
-            $stmt = $this->pdo->prepare('SELECT * FROM threads WHERE id = :threadId');
-            $stmt->bindValue(1, $commentId, PDO::PARAM_INT);
+            $stmt = $this->pdo->prepare('SELECT * FROM comments WHERE id = :commentId');
+            $stmt->bindValue(':commentId', $commentId, PDO::PARAM_INT);
             $stmt->execute();
             $data = $stmt->fetchAll();
         } catch (Exception $e) {
