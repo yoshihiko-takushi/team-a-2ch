@@ -8,9 +8,16 @@
 require('./_util/DbUtil.php');
 require('./_util/ViewUtil.php');
 
+define('MAX_PAGE_COUNT', 20);
+
 $dbUtil = new DbUtil();
-$threads = $dbUtil->paginate('threads');
-$threadsAllCount = $dbUtil->selectAllCount('threads');
+$paged = filter_input(INPUT_GET, 'paged');
+$nextPage = 1;
+$tableName = 'threads';
+$threads = '';
+$offset = 0;
+$threadsAllCount = $dbUtil->selectAllCount($tableName);
+$threads = $dbUtil->paginate($tableName);
 ?>
 <html>
 <head>

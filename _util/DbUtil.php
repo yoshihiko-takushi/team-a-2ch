@@ -11,7 +11,7 @@ class DbUtil
     private $dbHost = '127.0.0.1';
     private $dbName = 'a-team-2ch';
     private $user = 'root';
-    private $password = 'root';
+    private $password = 'testTamashiro2015';
     private $charset = 'utf8';
     private $dbh;
     private $pdo;
@@ -60,17 +60,19 @@ class DbUtil
     /**
      * ページネーションを実行する
      * @param $tableName
-     * @param int $limit
      * @param int $offset
+     * @param int $count
      * @return bool
      */
-    public function paginate($tableName, $limit = 0, $offset = 20) {
+    public function paginate($tableName) {
         $stmt = $this->pdo->prepare("SELECT * FROM $tableName");
-        $stmt->bindValue(":limit", $limit, PDO::PARAM_INT);
-        $stmt->bindValue(":offset", $offset, PDO::PARAM_INT);
         return $this->executeStatement($stmt);
     }
 
+    /**
+     * @param $tableName
+     * @return bool
+     */
     public function selectAllCount($tableName) {
         $sql = "SELECT COUNT(*) as count FROM $tableName";
         return $this->executeFirst($sql);
@@ -115,7 +117,7 @@ class DbUtil
     public function executeStatement($stmt) {
         try {
             $stmt->execute();
-            $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            $data = $stmt->fetchAll(PDO::FETCH_BOTH);
         } catch (Exception $e) {
             echo $e->getMessage();
             return false;
