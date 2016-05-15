@@ -64,8 +64,10 @@ class DbUtil
      * @param int $count
      * @return bool
      */
-    public function paginate($tableName) {
-        $stmt = $this->pdo->prepare("SELECT * FROM $tableName");
+    public function paginate($tableName, $offset, $count) {
+        $stmt = $this->pdo->prepare("SELECT * FROM $tableName limit :offset, :count");
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->bindValue(':count', $count, PDO::PARAM_INT);
         return $this->executeStatement($stmt);
     }
 
@@ -86,7 +88,7 @@ class DbUtil
     public function executeFirst($sql) {
         try {
             $query = $this->pdo->query($sql);
-            $data = $query->fetch(PDO::FETCH_ASSOC);
+            $data = $query->fetchColumn();
         } catch (Exception $e) {
             echo $e->getMessage();
             return false;
