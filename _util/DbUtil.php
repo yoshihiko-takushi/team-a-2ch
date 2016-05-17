@@ -11,7 +11,7 @@ class DbUtil
     private $dbHost = 'localhost';
     private $dbName = 'a-team-2ch';
     private $user = 'root';
-    private $password = '';
+    private $password = 'root';
     private $charset = 'utf8';
     private $dbh;
     private $pdo;
@@ -29,6 +29,7 @@ class DbUtil
      * DBへ接続する$pdoのオブジェクトを作成
      */
     private function init()
+    private function dß()
     {
         try {
             $this->pdo = new PDO(
@@ -203,7 +204,7 @@ class DbUtil
             return false;
         }
 
-        $execDeleteKey = $threadRecord['delete_key'];
+        $execDeleteKey = $threadRecord[0]['delete_key'];
         if ($deleteKey === $execDeleteKey) {
             // delete keyがマッチすれば削除
             try {
@@ -220,15 +221,55 @@ class DbUtil
             return false;
         }
     }
-    
+
+    /**
+     * コメントを削除するメソッド
+     * @param $threads_id
+     * @param $deleteKey
+     */
+    public function deleteByCommentId($threadId, $commentDeleteId, $commentDeleteKey)
+    {
+        $threadRecord = $this->selectByThreadId($threadId);
+        // もらったthreadIdでDBにデータが無かった場合
+        if (empty($threadRecord)) {
+            return false;
+        }
+
+        $commentId = $this->selectByCommentId($commentDeleteId);
+        if(empty($commentId)){
+            return false;
+        }
+
+        $commentsThreadId = $commentId[0]['threads_id'];
+        if($commentsThreadId != $threadId){
+          return false;
+        }
+
+        $execDeleteKey = $commentId[0]['delete_key'];
+        if ($commentDeleteKey === $execDeleteKey) {
+            // delete keyがマッチすれば削除
+            try {
+                $stmt = $this->pdo->prepare('DELETE FROM comments WHERE id = :commentId');
+                $stmt->bindValue(':commentId', $commentDeleteId, PDO::PARAM_INT);
+                $stmt->execute();
+            } catch (Exception $e) {
+                echo $e->getMessage();
+                return false;
+            }
+            return true;
+        } else {
+            // マッチしない場合
+            return false;
+        }
+
     public function insertComment($threadsId,$nickName,$comment){
         try{
             $this->pdo->beginTransaction();
-            $sql ="INSERT INTO comments(threads_id,comment,nickname)VALUES(:thredsIdDate,:commentDate,:niknameDate)"; 
+            $sql ="INSERT INTO comments(threads_id,comment,nickname)VALUES(:thredsIdDate,:commentDate,:niknameDate)";
             $stmh = $this->pdo->prepare($sql);
-            $stmh->bindValue(':thredsIdDate',$threadsId); 
-            $stmh->bindValue(':niknameDate',$nickName); 
-            $stmh->bindValue(':commentDate',$comment); 
+            $stmh->bindValue(':thredsIdDate',$threadsId);
+            $stmh->bindValue(':niknameDate',$nickName);
+            $stmh->bindValue(':commentDate',$comment);
             $stmh->execute();
             $this->pdo->commit();
         }catch(PDOException $e){
