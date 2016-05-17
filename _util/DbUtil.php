@@ -8,7 +8,7 @@
  */
 class DbUtil
 {
-    private $dbHost = '127.0.0.1';
+    private $dbHost = 'localhost';
     private $dbName = 'a-team-2ch';
     private $user = 'root';
     private $password = 'root';
@@ -64,8 +64,10 @@ class DbUtil
      * @param int $count
      * @return bool
      */
-    public function paginate($tableName) {
-        $stmt = $this->pdo->prepare("SELECT * FROM $tableName");
+    public function paginate($tableName, $offset, $count) {
+        $stmt = $this->pdo->prepare("SELECT * FROM $tableName limit :offset, :count");
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->bindValue(':count', $count, PDO::PARAM_INT);
         return $this->executeStatement($stmt);
     }
 
@@ -86,7 +88,7 @@ class DbUtil
     public function executeFirst($sql) {
         try {
             $query = $this->pdo->query($sql);
-            $data = $query->fetch(PDO::FETCH_ASSOC);
+            $data = $query->fetchColumn();
         } catch (Exception $e) {
             echo $e->getMessage();
             return false;
@@ -218,6 +220,7 @@ class DbUtil
             return false;
         }
     }
+
     /**
      * コメントを削除するメソッド
      * @param $threads_id
@@ -257,5 +260,22 @@ class DbUtil
             // マッチしない場合
             return false;
         }
+
+    public function insertComment($threadsId,$nickName,$comment){
+        try{
+            $this->pdo->beginTransaction();
+            $sql ="INSERT INTO comments(threads_id,comment,nickname)VALUES(:thredsIdDate,:commentDate,:niknameDate)";
+            $stmh = $this->pdo->prepare($sql);
+            $stmh->bindValue(':thredsIdDate',$threadsId);
+            $stmh->bindValue(':niknameDate',$nickName);
+            $stmh->bindValue(':commentDate',$comment);
+            $stmh->execute();
+            $this->pdo->commit();
+        }catch(PDOException $e){
+            $this->pdo->rollBack();
+            echo('Error:'.$e->getMessage());
+            return false;
+        }
+        return true;
     }
 }
