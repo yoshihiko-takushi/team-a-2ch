@@ -8,10 +8,10 @@
  */
 class DbUtil
 {
-    private $dbHost = '127.0.0.1';
+    private $dbHost = 'localhost';
     private $dbName = 'a-team-2ch';
     private $user = 'root';
-    private $password = 'testTamashiro2015';
+    private $password = '';
     private $charset = 'utf8';
     private $dbh;
     private $pdo;
@@ -219,5 +219,23 @@ class DbUtil
             // マッチしない場合
             return false;
         }
+    }
+    
+    public function insertComment($threadsId,$nickName,$comment){
+        try{
+            $this->pdo->beginTransaction();
+            $sql ="INSERT INTO comments(threads_id,comment,nickname)VALUES(:thredsIdDate,:commentDate,:niknameDate)"; 
+            $stmh = $this->pdo->prepare($sql);
+            $stmh->bindValue(':thredsIdDate',$threadsId); 
+            $stmh->bindValue(':niknameDate',$nickName); 
+            $stmh->bindValue(':commentDate',$comment); 
+            $stmh->execute();
+            $this->pdo->commit();
+        }catch(PDOException $e){
+            $this->pdo->rollBack();
+            echo('Error:'.$e->getMessage());
+            return false;
+        }
+        return true;
     }
 }
