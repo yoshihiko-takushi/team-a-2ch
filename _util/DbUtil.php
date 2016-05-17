@@ -28,6 +28,7 @@ class DbUtil
     /**
      * DBへ接続する$pdoのオブジェクトを作成
      */
+    private function init()
     private function dß()
     {
         try {
