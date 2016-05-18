@@ -7,10 +7,6 @@
  */
 require('./_util/DbUtil.php');
 
-//$dsn = 'mysql:dbname=a-team-2ch;host=localhost';
-//$user = 'root';
-//$password = '';
-
 $nickName = filter_input(INPUT_POST,"name");
 $threadsId = filter_input(INPUT_POST,"threads_id");
 $comment = htmlspecialchars(filter_input(INPUT_POST,"comment"));

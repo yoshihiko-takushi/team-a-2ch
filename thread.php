@@ -1,50 +1,29 @@
 <?php
-$dsn = 'mysql:dbname=a-team-2ch;host=localhost'; // charcter:utf8;
-$user = 'root';
-$password = '';
+require('./_util/DbUtil.php');
 $id;
-$threads_name;
-$delete_key;
+$threadsName;
+$deleteKey;
 $created;
 $modified;
-$commentDate;
 
 //受け取ったidパラメータを取得
-$threads_id = filter_input(INPUT_GET, 'id');
+$threadsId = filter_input(INPUT_GET, 'id');
 
 //SQLでidパラメータと対応するスレッドテーブルのidを取得
-if(!empty($threads_id) ) {
-    try{
-        $pdo = new PDO($dsn, $user, $password);
-        $pdo->query('SET NAMES utf8'); // NG
-        $pdo->setAttribute(PDO::ATTR_EMULATE_PREPARES,false);//プリペアを使えるようにする
-       
-        $threadsDate = $pdo->prepare("select * from threads WHERE :threadsIdDate");
-        $threadsDate->bindValue(':threadsIdDate',$threads_id);
-        
-        $commentpdo = new PDO($dsn, $user, $password);
-        $commentpdo->setAttribute(PDO::ATTR_EMULATE_PREPARES,false);//プリペアを使えるようにする
-        $commentDate = $commentpdo->prepare("select * from comments WHERE threads_id = :threadsIdDate");
-        $commentDate ->bindValue(':threadsIdDate',$threads_id);
-        $threadsDate->execute();//変更を確定
-        $commentDate->execute();//変更を確定
-       
-           
-        $threads = $threadsDate->fetchAll();
-        
-            foreach ($threads as $row) {
-                $id = $row['id'];
-                $threads_name = $row['threads_name'];
-                $delete_key = $row['delete_key'];
-                $created = $row['created'];
-                $modified = $row['modified'];
-            }  
-        
-         
-    }catch (PDOException $e){
-        echo('Error:'.$e->getMessage());
-        die();
-    }     
+if(!empty($threadsId) ) {
+    
+    $threadPdo = new DbUtil();
+    $threadsData = $threadPdo->getThredsData($threadsId);
+//    $commentsData = $threadPdo->getCommentsData($threadsId);  
+    
+   
+        foreach ($threadsData as $row) {
+            $id = $row['threads_id'];
+            $threadsName = $row['threads_name'];
+//            $deleteKey = $row['delete_key'];
+//            $created = $row['created'];
+//            $modified = $row['modified'];
+        }      
 }        
 ?>
 <!DOCTYPE html>
@@ -62,7 +41,7 @@ and open the template in the editor.
                 background: red;
             }
             #wraper{
-                width: 900px;
+                width: 750px;
                 margin: 0 auto;
                 padding:  20px 20px;
                 background: #fff;
@@ -116,6 +95,10 @@ and open the template in the editor.
                 margin: 0 auto;
             }
             
+            [name="delete"]{
+                width: 90px;                           
+            }
+            
             form{
                 padding-top: 30px;
             }
@@ -125,15 +108,19 @@ and open the template in the editor.
     </head>
     <body>
         <div id="wraper">
-        <h1><?php echo $threads_name; ?></h1>
+        <h1><?php echo $threadsName; ?></h1>
         
         <?php
-            foreach ($commentDate->fetchAll() as $row2) {
+        
+            $num = 1;
+            foreach ($threadsData as $row2) {      
+            echo '<form action=\"delete.php\" method=\"post\">';
             echo '<div class="toukou_area">';
-            echo "<p class=\"toukousya\">投稿者：".$row2['nickname']."&nbsp;&nbsp;ID&nbsp;".$row2['unique_id']."</p>";
+            echo "<p class=\"toukousya\">No".$num."&nbsp;&nbsp;投稿者：".$row2['nickname']."&nbsp;&nbsp;ID：".$row2['unique_id']."&nbsp;&nbsp"."投稿日：".$row2['created']."</p>";
             echo "<p class=\"txt_bold\">".$row2['comment']."</p>";
-            echo "<p class=\"toukoubi\">投稿日：".$row2['created']."</p>";
-            echo '</div>';
+            echo "<p class=\"toukoubi\"><input type=\"text\" name=\"delete\"><input type=\"submit\" name=\"delete\" value=\"削除\"></p>";
+            echo '</div></form>';
+            $num++;
         }
         ?>
         
@@ -146,7 +133,7 @@ and open the template in the editor.
                 <dt>削除キー</dt>
                 <dd><input type="text" name="delete_name" ></dd>
             </dl>
-            <input type="hidden" value="<?php echo $threads_id ?>" name="threads_id">
+            <input type="hidden" value="<?php echo $threadsId ?>" name="threads_id">
             <input type="submit" value="投稿" name="Submit">
         </from>
         </div>
