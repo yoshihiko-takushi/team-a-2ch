@@ -222,14 +222,18 @@ class DbUtil
         }
     }
     
-    public function insertComment($threadsId,$nickName,$comment){
+    public function insertComment($threadsId,$nickName,$comment,$deleteKey,$created){
         try{
             $this->pdo->beginTransaction();
-            $sql ="INSERT INTO comments(threads_id,comment,nickname)VALUES(:thredsIdDate,:commentDate,:niknameDate)"; 
+            $sql ="INSERT INTO comments(threads_id,comment,nickname,delete_key,created)VALUES(:thredsIdData,:commentData,:niknameData,:deleteKey,:created)";
+//            $sql ="INSERT INTO comments(threads_id,comment,nickname)VALUES(:thredsIdData,:commentData,:niknameData)";
             $stmh = $this->pdo->prepare($sql);
-            $stmh->bindValue(':thredsIdDate',$threadsId); 
-            $stmh->bindValue(':niknameDate',$nickName); 
-            $stmh->bindValue(':commentDate',$comment); 
+            $stmh->bindValue(':thredsIdData',$threadsId); 
+            $stmh->bindValue(':niknameData',$nickName); 
+            $stmh->bindValue(':commentData',$comment);
+//            $stmh->bindValue(':uniqueIdData',$uniqueId); 
+            $stmh->bindValue(':deleteKey',$deleteKey); 
+            $stmh->bindValue(':created',$created); 
             $stmh->execute();
             $this->pdo->commit();
         }catch(PDOException $e){
@@ -240,11 +244,34 @@ class DbUtil
         return true;
     }
     
+    public function deleteComment($threadsId,$commentsId,$deleteKey){
+
+            
+            try{
+          
+//                if($keyData['delete_key'] === $deleteKey){
+//                    $this->pdo->beginTransaction();
+                    $delete ="DELETE FROM comments WHERE id = :commentsId AND delete_key = :deleteKey";
+                    $stmh = $this->pdo->prepare($delete);
+                    $stmh->bindValue(':commentsId',$commentsId);
+                    $stmh->bindValue(':deleteKey',$deleteKey);             
+                    $stmh->execute();
+//                    $this->pdo->commit();
+                    
+                    
+//                }           
+                        
+            }catch(PDOException $e){
+//                $this->pdo->rollBack();
+                echo('Error:'.$e->getMessage());
+                return false;
+            }
+            return true;
+        }  
         
     public function getThredsData($threadsId) {
         $threadsData = [];
         try{
-//            $threadsData = $this->pdo->prepare("select * FROM threads WHERE :threadsId");
             $threadsData = $this->pdo->prepare("select threads.id as threads_id, threads.threads_name, threads.delete_key, threads.created, comments.id as comments_id, comments.comment,  comments.unique_id, comments.nickname, comments.delete_key, comments.created from threads inner join comments on (threads.id = comments.threads_id) where threads.id = :threadsId");
             $threadsData->bindValue(':threadsId',$threadsId);      
             $threadsData->execute();
@@ -256,5 +283,7 @@ class DbUtil
         return $threadsData;
         
     }
+    
+    
      
 }

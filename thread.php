@@ -6,6 +6,7 @@ $deleteKey;
 $created;
 $modified;
 
+
 //受け取ったidパラメータを取得
 $threadsId = filter_input(INPUT_GET, 'id');
 
@@ -88,7 +89,7 @@ and open the template in the editor.
                 margin-bottom: 10px;
             }
             
-            [name="Submit"]{
+            .submit02{
                 display: block;
                 width: 90px;
                 height: 40px;
@@ -114,11 +115,11 @@ and open the template in the editor.
         
             $num = 1;
             foreach ($threadsData as $row2) {      
-            echo '<form action=\"delete.php\" method=\"post\">';
+            echo '<form action="comment.php" method="post">';
             echo '<div class="toukou_area">';
             echo "<p class=\"toukousya\">No".$num."&nbsp;&nbsp;投稿者：".$row2['nickname']."&nbsp;&nbsp;ID：".$row2['unique_id']."&nbsp;&nbsp"."投稿日：".$row2['created']."</p>";
             echo "<p class=\"txt_bold\">".$row2['comment']."</p>";
-            echo "<p class=\"toukoubi\"><input type=\"text\" name=\"delete\"><input type=\"submit\" name=\"delete\" value=\"削除\"></p>";
+            echo "<p class=\"toukoubi\"><input type=\"hidden\" name=\"comments_id\" value=\"".$row2['comments_id']."\"><input type=\"text\" name=\"delete_key\"><input type=\"hidden\" value=\"".$id."\"name=\"threads_id\"><input type=\"submit\" name=\"submit\" value=\"削除\"></p>";
             echo '</div></form>';
             $num++;
         }
@@ -131,10 +132,12 @@ and open the template in the editor.
                 <dt>コメント</dt>
                 <dd><textarea name="comment"></textarea></dd>
                 <dt>削除キー</dt>
-                <dd><input type="text" name="delete_name" ></dd>
+                <dd><input type="text" name="delete_key" ></dd>
             </dl>
             <input type="hidden" value="<?php echo $threadsId ?>" name="threads_id">
-            <input type="submit" value="投稿" name="Submit">
+            <input type="hidden" value="<?php echo $threadsId ?>" name="unique_id">
+            <input type="hidden" value="<?php echo $threadsId ?>" name="created">
+            <input type="submit" value="投稿" name="submit" class="submit02">
         </from>
         </div>
     </body>
