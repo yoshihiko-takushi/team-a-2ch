@@ -11,8 +11,9 @@ class DbUtil
     private $dbHost = 'localhost';
     private $dbName = 'a-team-2ch';
     private $user = 'root';
-    private $password = 'root';
+    private $password = 'testTamashiro2015';
     private $charset = 'utf8';
+    private $unixSocket = '/tmp/mysql.sock';
     private $dbh;
     private $pdo;
 
@@ -21,7 +22,7 @@ class DbUtil
      */
     public function __construct()
     {
-        $this->dbh = "mysql:dbname=$this->dbName;host=$this->dbHost;charset=$this->charset";
+        $this->dbh = "mysql:dbname=$this->dbName;unix_socket=$this->unixSocket;host=$this->dbHost;charset=$this->charset";
         $this->init();
     }
 
@@ -29,7 +30,6 @@ class DbUtil
      * DBへ接続する$pdoのオブジェクトを作成
      */
     private function init()
-    private function dß()
     {
         try {
             $this->pdo = new PDO(
@@ -236,13 +236,13 @@ class DbUtil
         }
 
         $commentId = $this->selectByCommentId($commentDeleteId);
-        if(empty($commentId)){
+        if (empty($commentId)) {
             return false;
         }
 
         $commentsThreadId = $commentId[0]['threads_id'];
-        if($commentsThreadId != $threadId){
-          return false;
+        if ($commentsThreadId != $threadId) {
+            return false;
         }
 
         $execDeleteKey = $commentId[0]['delete_key'];
@@ -261,6 +261,7 @@ class DbUtil
             // マッチしない場合
             return false;
         }
+    }
 
     public function insertComment($threadsId,$nickName,$comment){
         try{
