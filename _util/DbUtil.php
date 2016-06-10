@@ -26,6 +26,7 @@ class DbUtil
         $this->init();
     }
 
+
     /**
      * DBへ接続する$pdoのオブジェクトを作成
      */
@@ -65,7 +66,8 @@ class DbUtil
      * @param int $count
      * @return bool
      */
-    public function paginate($tableName, $offset, $count) {
+    public function paginate($tableName, $offset, $count)
+    {
         $stmt = $this->pdo->prepare("SELECT * FROM $tableName limit :offset, :count");
         $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
         $stmt->bindValue(':count', $count, PDO::PARAM_INT);
@@ -76,7 +78,8 @@ class DbUtil
      * @param $tableName
      * @return bool
      */
-    public function selectAllCount($tableName) {
+    public function selectAllCount($tableName)
+    {
         $sql = "SELECT COUNT(*) as count FROM $tableName";
         return $this->executeFirst($sql);
     }
@@ -86,7 +89,8 @@ class DbUtil
      * @param $sql
      * @return bool
      */
-    public function executeFirst($sql) {
+    public function executeFirst($sql)
+    {
         try {
             $query = $this->pdo->query($sql);
             $data = $query->fetchColumn();
@@ -102,7 +106,8 @@ class DbUtil
      * @param $sql
      * @return bool
      */
-    public function executeQuery($sql) {
+    public function executeQuery($sql)
+    {
         try {
             $query = $this->pdo->query($sql);
             $data = $query->fetchAll(PDO::FETCH_ASSOC);
@@ -117,7 +122,8 @@ class DbUtil
      * @param $stmt
      * @return bool
      */
-    public function executeStatement($stmt) {
+    public function executeStatement($stmt)
+    {
         try {
             $stmt->execute();
             $data = $stmt->fetchAll(PDO::FETCH_BOTH);
@@ -263,21 +269,62 @@ class DbUtil
         }
     }
 
-    public function insertComment($threadsId,$nickName,$comment){
-        try{
+    public function insertComment($threadsId, $nickName, $comment, $deleteKey, $created)
+    {
+        try {
             $this->pdo->beginTransaction();
-            $sql ="INSERT INTO comments(threads_id,comment,nickname)VALUES(:thredsIdDate,:commentDate,:niknameDate)";
+            $sql = "INSERT INTO comments(threads_id,comment,nickname,delete_key,created)VALUES(:thredsIdData,:commentData,:niknameData,:deleteKey,:created)";
             $stmh = $this->pdo->prepare($sql);
-            $stmh->bindValue(':thredsIdDate',$threadsId);
-            $stmh->bindValue(':niknameDate',$nickName);
-            $stmh->bindValue(':commentDate',$comment);
+            $stmh->bindValue(':thredsIdData', $threadsId);
+            $stmh->bindValue(':niknameData', $nickName);
+            $stmh->bindValue(':commentData', $comment);
+            $stmh->bindValue(':deleteKey', $deleteKey);
+            $stmh->bindValue(':created', $created);
             $stmh->execute();
             $this->pdo->commit();
-        }catch(PDOException $e){
+        } catch (PDOException $e) {
             $this->pdo->rollBack();
-            echo('Error:'.$e->getMessage());
+            echo('Error:' . $e->getMessage());
             return false;
         }
         return true;
     }
+
+    public function deleteComment($threadsId, $commentsId, $deleteKey)
+    {
+
+
+        try {
+
+            $delete = "DELETE FROM comments WHERE id = :commentsId AND delete_key = :deleteKey";
+            $stmh = $this->pdo->prepare($delete);
+            $stmh->bindValue(':commentsId', $commentsId);
+            $stmh->bindValue(':deleteKey', $deleteKey);
+            $stmh->execute();
+
+
+        } catch (PDOException $e) {
+            echo('Error:' . $e->getMessage());
+            return false;
+        }
+        return true;
+    }
+
+    public function getThredsData($threadsId)
+    {
+        $threadsData = [];
+        try {
+            $threadsData = $this->pdo->prepare("select threads.id as threads_id, threads.threads_name, threads.delete_key, threads.created, comments.id as comments_id, comments.comment,  comments.unique_id, comments.nickname, comments.delete_key, comments.created from threads inner join comments on (threads.id = comments.threads_id) where threads.id = :threadsId");
+            $threadsData->bindValue(':threadsId', $threadsId);
+            $threadsData->execute();
+            $threadsData = $threadsData->fetchAll();
+        } catch (PDOException $e) {
+            echo('Error:' . $e->getMessage());
+            return false;
+        }
+        return $threadsData;
+
+    }
+
+
 }
